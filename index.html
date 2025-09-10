@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrogen | AI Coding Agent for Developers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .terminal-bg {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .command {
+            color: #38bdf8;
+        }
+        
+        .output {
+            color: #a5b4fc;
+        }
+        
+        .success {
+            color: #4ade80;
+        }
+        
+        .error {
+            color: #f87171;
+        }
+        
+        .directory {
+            color: #f59e0b;
+        }
+        
+        .file {
+            color: #67e8f9;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+        
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+        }
+        
+        .feature-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover .feature-front {
+            transform: translateY(-100%);
+        }
+        
+        .feature-card:hover .feature-back {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .feature-front {
+            transition: transform 0.3s ease;
+            backface-visibility: hidden;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .feature-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            padding: 1.5rem;
+            z-index: 1;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        
+        .productivity-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Add modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 32rem;
+            width: 90%;
+            position: relative;
+            transform: translateY(0);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            color: #6b7280;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: #111827;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 nav-blur border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xl">H</div>
+                        <span class="ml-3 text-xl font-bold text-gray-900">Hydrogen</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex md:items-center md:space-x-8">
+                    <a href="#features" class="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">How It Works</a>
+                    <a href="#subfeatures" class="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">Why Hydrogen?</a>
+                    <a href="#testimonials" class="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">Testimonials</a>
+                    <a href="#faq" class="text-gray-500 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">FAQ</a>
+                </div>
+                <div class="hidden md:block">
+                    <a href="#get-started" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-lg shadow-indigo-500/20">Get Started</a>
+                </div>
+                <button class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 focus:outline-none mobile-menu-button">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="md:hidden mobile-menu hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100">Features</a>
+                <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100">How It Works</a>
+                <a href="#subfeatures" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100">Why Hydrogen?</a>
+                <a href="#testimonials" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100">Testimonials</a>
+                <a href="#faq" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-100">FAQ</a>
+                <a href="#get-started" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 text-center mt-2">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="mb-6 flex items-center gap-2 bg-indigo-50 text-indigo-700 w-fit px-4 py-2 rounded-full">
+                        <span class="font-medium">Act smarter and ship faster with Hydrogen</span>
+                        <span class="text-sm animate-pulse">🚀</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                        The <span class="gradient-text">best way to code</span> with AI
+                    </h1>
+                    <p class="mt-6 text-xl text-gray-600 max-w-2xl">
+                        Hydrogen is an AI coding agent that accelerates development by automating repetitive tasks, generating boilerplate code, and helping you debug—with a <span class="font-semibold">40-90% increase in developer productivity</span>.
+                    </p>
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <a href="#get-started" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg shadow-indigo-500/20">
+                            Start Coding with Hydrogen
+                        </a>
+                        <a href="#terminal-demo" class="border border-gray-300 hover:border-indigo-600 text-gray-700 hover:text-indigo-600 px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
+                            See Terminal Demo
+                        </a>
+                    </div>
+                    <div class="mt-6 flex items-center">
+                        <div class="flex -space-x-2">
+                            <img class="h-10 w-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/63.jpg" alt="">
+                            <img class="h-10 w-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                            <img class="h-10 w-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/19.jpg" alt="">
+                        </div>
+                        <p class="ml-4 text-sm text-gray-500">
+                            Used by <span class="font-medium text-indigo-600">1000+</span> developers worldwide
+                        </p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="terminal-bg rounded-xl shadow-2xl overflow-hidden">
+                        <div class="flex items-center px-4 py-3 bg-gray-900 border-b border-gray-700">
+                            <div class="flex space-x-2 mr-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="text-sm text-gray-400">Hydrogen --mode agent --model qwen3:30b</div>
+                        </div>
+                        <div class="p-4 font-mono text-sm space-y-4">
+                            <div>
+                                <span class="text-gray-400">user@devbox:</span><span class="directory">~/projects</span><span class="text-gray-400">$ </span>
+                                <span class="command">hydrogen --mode agent --model qwen3:30b</span>
+                            </div>
+                            <div class="success">
+                                Hydrogen v1.2.9 is ready!
+                            </div>
+                            <div class="output">
+                                Current backend: ollama | Current model: qwen3:30b | Current mode: agent
+                            </div>
+                            <div>
+                                <span class="text-gray-400">[agent] projects > </span>
+                                <span class="command">@scaffold Create a task management app with React and Express</span>
+                            </div>
+                            <div class="output">
+                                Analyzing requirements and planning architecture...
+                            </div>
+                            <div class="success">
+                                ✓ Planned project structure: client/ (React app), server/ (Express API)
+                            </div>
+                            <div class="success">
+                                ✓ Selected technologies: React, Express, MongoDB, TailwindCSS
+                            </div>
+                            <div class="text-yellow-300">
+                                Ready to begin development! Switch to @code mode to implement the project.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">
+                    Powerful Features Designed for Developers
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    Hydrogen's intelligent features help you code faster and smarter
+                </p>
+            </div>
+            
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Card 1 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-robot text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Agent Mode</h3>
+                        <p class="text-gray-600 text-center">
+                            Autonomous coding partner that analyzes your project and executes tasks to solve complex problems.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Agent Mode Details</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Proactively suggests and executes coding actions</li>
+                            <li>Deep context awareness of your project</li>
+                            <li>Can create and edit files with approval</li>
+                            <li>Supports @scaffold and @code submodes</li>
+                            <li>Mimics senior developer thinking</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">40-90% productivity increase</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 2 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-comments text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Chat Mode</h3>
+                        <p class="text-gray-600 text-center">
+                            Get instant answers to coding questions with contextual understanding of your project.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Chat Mode Details</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Natural conversation interface</li>
+                            <li>Understands code context when answering</li>
+                            <li>Provides debugging assistance</li>
+                            <li>Explains complex concepts clearly</li>
+                            <li>Suggests optimizations and best practices</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">50% faster problem solving</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 3 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-code-branch text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Submode Intelligence</h3>
+                        <p class="text-gray-600 text-center">
+                            Specialized modes for each development phase - @scaffold for planning, @code for implementation.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Submode Details</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li><strong>@scaffold:</strong> Plans entire app architecture</li>
+                            <li><strong>@code:</strong> Implements based on scaffold</li>
+                            <li>Auto-detects and suggests when to switch modes</li>
+                            <li>Maintains consistency across phases</li>
+                            <li>Optimized workflows for each task type</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">3x faster project setup</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 4 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-project-diagram text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Codebase Context</h3>
+                        <p class="text-gray-600 text-center">
+                            Scans and understands your entire project structure and file contents.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Context Awareness</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Recursive directory scanning</li>
+                            <li>Understands file relationships</li>
+                            <li>Maintains project-wide context</li>
+                            <li>Detects inconsistencies in architecture</li>
+                            <li>Suggests improvements matching style</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">90% more relevant results</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 5 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-terminal text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Built-in Tools</h3>
+                        <p class="text-gray-600 text-center">
+                            Powerful terminal commands to navigate and manipulate projects without leaving Hydrogen.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Terminal Tools</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li><strong>/ls:</strong> List project structure</li>
+                            <li><strong>/cat:</strong> View file contents</li>
+                            <li><strong>/exec:</strong> Run terminal commands</li>
+                            <li><strong>/cd:</strong> Change directories</li>
+                            <li>Seamless workflow integration</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">No context switching</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 6 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-server text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Multi-Backend</h3>
+                        <p class="text-gray-600 text-center">
+                            Supports Ollama, LM Studio, OpenRouter, and Google API for model flexibility.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Backend Choices</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Local models for privacy (Ollama)</li>
+                            <li>Cloud models for scale (Google)</li>
+                            <li>Support for Qwen3, Gemini 2.5 Pro, Phi4</li>
+                            <li>Easy configuration switching</li>
+                            <li>Balanced cost/performance options</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">Choose your power</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Video Section -->
+    <section id="demo" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">
+                    See Hydrogen in Action
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    Watch how Hydrogen transforms your development workflow
+                </p>
+            </div>
+
+            <div class="mt-12 relative">
+                <div class="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-2xl">
+                    <video 
+                        class="w-full h-full object-cover"
+                        controls
+                        poster="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                    >
+                        <source src="video/vid.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="w-20 h-20 rounded-full bg-indigo-600 bg-opacity-90 flex items-center justify-center transform hover:scale-110 transition-transform duration-300 pointer-events-auto cursor-pointer play-button">
+                        <i class="fas fa-play text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bolt text-indigo-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Lightning Fast</h3>
+                    <p class="mt-2 text-gray-600">See how Hydrogen accelerates your development process</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-code text-indigo-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Smart Coding</h3>
+                    <p class="mt-2 text-gray-600">Watch the AI agent write and optimize code in real-time</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-magic text-indigo-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Magic Features</h3>
+                    <p class="mt-2 text-gray-600">Discover how Hydrogen's features work together</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subfeatures Section -->
+    <section id="subfeatures" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-sm font-semibold tracking-wide text-indigo-600 uppercase">Why Hydrogen?</span>
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl mt-4">
+                    The Future of AI-Assisted Development
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    Why thousands of developers trust Hydrogen for their most important projects
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12">
+                <!-- Card 1 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                         <div class="productivity-badge">90% Accuracy Boost</div>
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-brain text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Front-tier Intelligence & Flexibility</h3>
+                        <p class="text-gray-600 text-center">
+                            With the power of state-of-the-art models accessible via various backends, we provide front-tier intelligence with low to no cost!
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Backend Choices</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Supports Ollama, LM Studio, OpenRouter, and Google API</li>
+                            <li>Local models for privacy (Ollama)</li>
+                            <li>Cloud models for scale (Google)</li>
+                            <li>Support for Gemini 2.5 Pro, Qwen3, Phi4, Deepseek</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">Choose your power</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                        <div class="productivity-badge">10x Faster</div>
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-code text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">An Agent That Codes, Fixes, and Thinks Ahead</h3>
+                        <p class="text-gray-600 text-center">
+                            Experience an AI coding agent that not only writes code, but also thinks like a developer, proactively analyzing context and suggesting actions.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">AI Partner</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Proactive Analysis</li>
+                            <li>Contextual Awareness</li>
+                            <li>Execution Approval</li>
+                            <li>Critical Thinking and Mentorship</li>
+                            <li>Anticipates your needs and streamlines workflow</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">Human-AI collaboration at its finest</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                         <div class="productivity-badge">Deep Context</div>
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-book text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Deep Contextual Understanding</h3>
+                        <p class="text-gray-600 text-center">
+                            Hydrogen understands your entire codebase and your precise development goals by scanning your project structure and files.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Contextual Awareness</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Scans entire codebase for a complete understanding</li>
+                            <li>Provides truly relevant assistance</li>
+                            <li>Detects inconsistencies in architecture</li>
+                            <li>Suggests improvements matching your style</li>
+                            <li>Sees the big picture, not just isolated snippets</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">90% more relevant results</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 4 -->
+                <div class="group relative h-80 feature-card bg-white p-6 shadow-md border border-gray-100">
+                    <div class="feature-front p-6 h-full flex flex-col justify-between">
+                         <div class="productivity-badge">AI Partner</div>
+                        <div class="flex items-center justify-center w-16 h-16 rounded-lg bg-indigo-100 text-indigo-600 mb-6 mx-auto">
+                            <i class="fas fa-robot text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-center text-gray-900 mb-3">Like Pair Programming With a Senior Engineer</h3>
+                        <p class="text-gray-600 text-center">
+                            Hydrogen finds edge cases you might miss, suggests architectural improvements, and explains its reasoning.
+                        </p>
+                    </div>
+                    <div class="feature-back bg-indigo-600 text-white">
+                        <h3 class="text-xl font-bold mb-3">Senior Engineer</h3>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li>Thinks critically about your code</li>
+                            <li>Finds edge cases you might miss</li>
+                            <li>Suggests architectural improvements</li>
+                            <li>Provides clear reasoning and explanations</li>
+                            <li>Benefits of mentorship without the meetings</li>
+                        </ul>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-center justify-center">
+                                <span class="text-sm bg-indigo-700 px-3 py-1 rounded-full">Pair programming without the interruptions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terminal Demo Section -->
+    <section id="terminal-demo" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">
+                    See Hydrogen in Action
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    Real-world examples of how Hydrogen accelerates development
+                </p>
+            </div>
+            
+            <div class="mt-16 bg-white rounded-xl shadow-2xl overflow-hidden">
+                <div class="terminal-bg overflow-auto h-[32rem] p-4">
+                    <div class="font-mono text-sm space-y-4">
+                        <div>
+                            <span class="text-gray-400">user@devbox:</span><span class="directory">~/projects</span><span class="text-gray-400">$ </span>
+                            <span class="command">hydrogen --mode agent --model qwen3:30b</span>
+                        </div>
+                        <div class="success">
+                            Hydrogen v1.2.9 is ready!
+                        </div>
+                        <div class="output">
+                            Current backend: ollama | Current model: qwen3:30b | Current mode: agent
+                        </div>
+                        <div>
+                            <span class="text-gray-400">[agent] projects > </span>
+                            <span class="command">/ls</span>
+                        </div>
+                        <div class="output">
+                            Contents of ~/projects:
+                            <div class="ml-4">
+                                <span class="directory">ecommerce-app/</span>
+                                <br>
+                                <span class="file">blog-post.md</span> (1.2 KB)
+                                <br>
+                                <span class="file">todo.txt</span> (0.4 KB)
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">[agent] projects > </span>
+                            <span class="command">@scaffold Create a task management app with React and Express</span>
+                        </div>
+                        <div class="output">
+                            Analyzing requirements and planning architecture...
+                        </div>
+                        <div class="success">
+                            ✓ Planned project structure: client/ (React app), server/ (Express API)
+                        </div>
+                        <div class="success">
+                            ✓ Selected technologies: React, Express, MongoDB, TailwindCSS
+                        </div>
+                        <div class="output">
+                            ✓ Defined core features:
+                            <div class="ml-4 mt-1">
+                                - User authentication
+                                <br>
+                                - Task creation/editing
+                                <br>
+                                - Status tracking
+                                <br>
+                                - Priority levels
+                                <br>
+                                - Filtering and sorting
+                            </div>
+                        </div>
+                        <div class="text-yellow-300">
+                            Ready to begin development! Switch to @code mode to implement the project.
+                        </div>
+                        <div>
+                            <span class="text-gray-400">[agent] projects > </span>
+                            <span class="command">@code</span>
+                        </div>
+                        <div class="output">
+                            Beginning implementation of task management app...
+                        </div>
+                        <div class="success">
+                            Create directory: "task-manager"
+                            <div class="ml-4">
+                                Create directory: "client"
+                                <br>
+                                Create directory: "server"
+                                <br>
+                                Create file: "client/package.json"
+                                <br>
+                                Create file: "client/src/App.jsx"
+                                <br>
+                                Create file: "server/package.json"
+                                <br>
+                                Create file: "server/index.js"
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">[agent] projects > </span>
+                            <span class="command">/cat task-manager/client/src/App.jsx</span>
+                        </div>
+                        <div class="output">
+                            import React from 'react';
+                            <br>
+                            import './App.css';
+                            <br><br>
+                            function App() {
+                            <br>
+                            <span class="ml-4">return (</span>
+                            <br>
+                            <span class="ml-8">&lt;div className="App"&gt;</span>
+                            <br>
+                            <span class="ml-12">&lt;h1&gt;Task Manager&lt;/h1&gt;</span>
+                            <br>
+                            <span class="ml-8">&lt;/div&gt;</span>
+                            <br>
+                            <span class="ml-4">);</span>
+                            <br>
+                            }
+                            <br><br>
+                            export default App;
+                        </div>
+                        <div class="output">
+                            Created initial project structure. Would you like to:
+                            <div class="ml-4 mt-1">
+                                1. Add user authentication
+                                <br>
+                                2. Implement task creation UI
+                                <br>
+                                3. Deploy the app
+                                <br>
+                                4. Continue development
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <p class="text-xl text-gray-700 font-medium">"Hydrogen helps me <span class="text-indigo-600">think through complex problems</span> while handling the boilerplate code"</p>
+                <p class="mt-4 text-gray-500">- Sarah K., Senior Full Stack Developer</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">
+                    How Hydrogen Works
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    A look under the hood of our intelligent coding agent
+                </p>
+            </div>
+            
+            <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="space-y-12">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-100 text-indigo-600">
+                                    <span class="text-xl font-bold">1</span>
+                                </div>
+                            </div>
+                            <div class="ml-6">
+                                <h3 class="text-lg font-bold text-gray-900">Codebase Scanning & Context Building</h3>
+                                <p class="mt-2 text-gray-600">
+                                    Hydrogen begins by recursively scanning your project directory, reading file contents, and building a complete understanding of your codebase structure. This deep context is included in every request to the AI model.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-100 text-indigo-600">
+                                    <span class="text-xl font-bold">2</span>
+                                </div>
+                            </div>
+                            <div class="ml-6">
+                                <h3 class="text-lg font-bold text-gray-900">Task Analysis & Submode Activation</h3>
+                                <p class="mt-2 text-gray-600">
+                                    The AI checks if the task contains special directives like @scaffold or @code, activating specialized workflows for project planning (@scaffold) or implementation (@code). Each submode has optimized behavior for its purpose.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-100 text-indigo-600">
+                                    <span class="text-xl font-bold">3</span>
+                                </div>
+                            </div>
+                            <div class="ml-6">
+                                <h3 class="text-lg font-bold text-gray-900">Action Execution (With Approval)</h3>
+                                <p class="mt-2 text-gray-600">
+                                    In Agent Mode, Hydrogen suggests concrete actions like file creation/editing, asks for your confirmation, then executes them. You maintain full control while benefiting from AI-powered automation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-8 rounded-xl">
+                    <div class="code-block">
+                        <span class="text-gray-400"># System Prompt for Model:</span>
+                        <br><br>
+                        <span class="success">You are Hydrogen coding assistant with these abilities:</span>
+                        <br>
+                        <span class="directory">TOOLS:</span>
+                        <span class="ml-4">- Create file: {path}</span>
+                        <br>
+                        <span class="ml-4">- Edit file: {path}</span>
+                        <br><br>
+                        <span class="directory">USER REQUEST:</span>
+                        <span class="ml-4">&lt;task&gt;Add authentication to app&lt;/task&gt;</span>
+                        <br><br>
+                        <span class="directory">PROJECT STRUCTURE:</span>
+                        <div class="ml-4">
+                            <span class="file">package.json</span>
+                            <br>
+                            <div class="directory">src/</div>
+                            <div class="ml-4">
+                                <span class="file">App.js</span>
+                                <br>
+                                <span class="file">index.js</span>
+                                <br>
+                                <div class="directory">components/</div>
+                                <div class="ml-4">
+                                    <span class="file">Navbar.js</span>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <span class="directory">FILE CONTENTS:</span>
+                        <span class="ml-4 file">src/App.js:</span>
+                        <div class="ml-8">
+                            import React from 'react';
+                            <br>
+                            import Navbar from './components/Navbar';
+                            <br><br>
+                            function App() {
+                            <br>
+                            <span class="ml-4">return &lt;Navbar /&gt;;</span>
+                            <br>
+                            }
+                        </div>
+                        <br>
+                        <span class="success">SUGGESTED ACTION:</span>
+                        <span class="ml-4">Create file: src/auth/AuthProvider.js</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">
+                    Simple, Transparent Pricing
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    Choose the plan that best fits your development needs
+                </p>
+            </div>
+
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Basic Plan -->
+                <div class="relative bg-white p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="absolute top-0 right-0 -mt-4 mr-4">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full">Popular</span>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-900">Basic</h3>
+                        <div class="mt-4 flex items-baseline justify-center">
+                            <span class="text-5xl font-extrabold tracking-tight text-gray-900">$0.99</span>
+                            <span class="ml-1 text-xl font-semibold text-gray-500">one-time</span>
+                        </div>
+                        <p class="mt-6 text-gray-500">Perfect for individual developers</p>
+                    </div>
+                    <div class="mt-8 space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Agent Mode</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Chat Mode</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Built-in Tools</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Ollama/LM Studio Support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Google AI Studio Support</span>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button onclick="showPurchaseModal('Basic')" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="relative bg-white p-8 rounded-xl border-2 border-indigo-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="absolute top-0 right-0 -mt-4 mr-4">
+                        <span class="bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Best Value</span>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-900">Pro</h3>
+                        <div class="mt-4 flex items-baseline justify-center">
+                            <span class="text-5xl font-extrabold tracking-tight text-gray-900">$2.99</span>
+                            <span class="ml-1 text-xl font-semibold text-gray-500">/month</span>
+                        </div>
+                        <p class="mt-6 text-gray-500">For professional developers</p>
+                    </div>
+                    <div class="mt-8 space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Everything in Basic</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">@scaffold Submode</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">@code Submode</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">OpenRouter Support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">OpenAI Support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Anthropic Support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Requesty Support</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">All Future Updates</span>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button onclick="showPurchaseModal('Pro')" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lifetime Plan -->
+                <div class="relative bg-white p-8 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-900">Lifetime</h3>
+                        <div class="mt-4 flex items-baseline justify-center">
+                            <span class="text-5xl font-extrabold tracking-tight text-gray-900">$3.99</span>
+                            <span class="ml-1 text-xl font-semibold text-gray-500">one-time</span>
+                        </div>
+                        <p class="mt-6 text-gray-500">For long-term developers</p>
+                    </div>
+                    <div class="mt-8 space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Everything in Pro</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Lifetime Access</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">No Monthly Fees</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span class="ml-3 text-gray-600">Keep Forever</span>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button onclick="showPurchaseModal('Lifetime')" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
+                            Get Started
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <p class="text-gray-600">All plans include a 30-day money-back guarantee</p>
+                <p class="mt-2 text-sm text-gray-500">Need a custom plan? <a href="mailto:ayaan.egalaxy@gmail.com" class="text-indigo-600 hover:text-indigo-700">Contact us</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePurchaseModal()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Purchase Instructions</h3>
+                <p class="text-gray-600 mb-6">
+                    To purchase the <span id="selectedPlan" class="font-semibold"></span> plan, please follow these steps:
+                </p>
+                <ol class="text-left text-gray-600 space-y-3 mb-6">
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full mr-2">1</span>
+                        <span>Send an email to <a href="mailto:ayaan.egalaxy@gmail.com" class="text-indigo-600 hover:text-indigo-700">ayaan.egalaxy@gmail.com</a></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full mr-2">2</span>
+                        <span>Include your preferred plan in the subject line</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full mr-2">3</span>
+                        <span>We'll respond with payment instructions within 24 hours</span>
+                    </li>
+                </ol>
+                <button onclick="closePurchaseModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
+                    Got it, thanks!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900 sm:text-4xl">
+                    What Developers Say About Hydrogen
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                    Don't just take our word for it—hear from our users
+                </p>
+            </div>
+            
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-full border-2 border-gray-200" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael S.">
+                        <div class="ml-4">
+                            <h4 class="font-bold text-gray-900">Michael S.</h4>
+                            <p class="text-sm text-gray-500">Senior Developer @TechCorp</p>
+                            <div class="flex text-yellow-400 mt-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-gray-600 italic">
+                        "Hydrogen has fundamentally changed how I approach development. The Agent Mode's @scaffold and @code features have eliminated countless hours of boilerplate work. I can now prototype ideas in minutes that used to take days."
+                    </p>
+                    <div class="mt-4 flex items-center">
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded">Productivity Increased 90%</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-full border-2 border-gray-200" src="https://randomuser.me/api/portraits/women/43.jpg" alt="Sarah L.">
+                        <div class="ml-4">
+                            <h4 class="font-bold text-gray-900">Sarah L.</h4>
+                            <p class="text-sm text-gray-500">Freelance Web Developer</p>
+                            <div class="flex text-yellow-400 mt-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-gray-600 italic">
+                        "As a freelancer working with multiple codebases, Hydrogen's ability to understand project structure is invaluable. No other tool comes close to its contextual awareness. It's like having a senior developer always available to help."
+                    </p>
+                    <div class="mt-4 flex items-center">
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded">Works With Any Stack</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-full border-2 border-gray-200" src="https://randomuser.me/api/portraits/men/76.jpg" alt="David K.">
+                        <div class="ml-4">
+                            <h4 class="font-bold text-gray-900">David K.</h4>
+                            <p class="text-sm text-gray-500">CTO @StartUp</p>
+                            <div class="flex text-yellow-400 mt-1">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-gray-600 italic">
+                        "We've equipped our entire dev team with Hydrogen. The productivity gains are measurable—projects that took weeks now take days. The built-in terminal tools mean developers never have to leave their workflow to get AI assistance."
+                    </p>
+                    <div class="mt-4 flex items-center">
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded">Team Onboarding 70% Faster</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 bg-indigo-50 rounded-xl p-8 text-center">
+                <h3 class="text-2xl font-bold text-gray-900">Ready to increase your productivity by 40-90%?</h3>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
+                    Hydrogen helps developers of all levels build better software, faster. Whether you're coding solo or leading a team, Hydrogen accelerates your workflow.
+                </p>
+                <div class="mt-6 flex justify-center">
+                    <a href="#get-started" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors shadow-lg shadow-indigo-500/20">
+                        Get Hydrogen Today
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Get Started Section -->
+    <section id="get-started" class="py-20 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-white sm:text-4xl">
+                    Ready to Transform Your Development Workflow?
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-indigo-100">
+                    Join thousands of developers who are building faster with Hydrogen
+                </p>
+                <div class="mt-8 flex flex-wrap justify-center gap-4">
+                    <a href="mailto:ayan.egalaxy2012@gmail.com" class="bg-white hover:bg-gray-100 text-indigo-600 px-8 py-4 rounded-lg text-lg font-semibold transition-colors shadow-lg">
+                        Get Hydrogen Now
+                    </a>
+                    <a href="#terminal-demo" class="border-2 border-white hover:bg-white hover:bg-opacity-10 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                        See Full Demo
+                    </a>
+                </div>
+                <p class="mt-6 text-sm text-indigo-100">
+                    30-day money-back guarantee · Cancel anytime
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+                <div class="col-span-2">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xl">H</div>
+                        <span class="ml-3 text-xl font-bold">Hydrogen</span>
+                    </div>
+                    <p class="mt-4 text-gray-400">
+                        The intelligent coding agent that helps you build faster and smarter, right from your terminal.
+                    </p>
+                    <div class="mt-6 flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://github.com/your-repo/hydrogen" target="_blank" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Product</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li><a href="#features" class="text-gray-400 hover:text-white">Features</a></li>
+                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white">How It Works</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Releases</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Company</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="mailto:ayan.egalaxy2012@gmail.com" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Legal</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">License</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400">
+                    &copy; 2023 Hydrogen. All rights reserved.
+                </p>
+                <div class="mt-4 md:mt-0 flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white">Security</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Status</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.querySelector('.mobile-menu');
+            const icon = this.querySelector('svg');
+            mobileMenu.classList.toggle('hidden');
+
+            if (mobileMenu.classList.contains('hidden')) {
+                // Menu is closed, show hamburger icon
+                icon.innerHTML = `<path stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M4 6h16M4 12h16M4 18h16" />`;
+            } else {
+                // Menu is open, show close icon
+                icon.innerHTML = `<path stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M6 18L18 6M6 6l12 12" />`;
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                // Close mobile menu if open
+                const mobileMenu = document.querySelector('.mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    // Revert the button icon
+                    const menuButton = document.querySelector('.mobile-menu-button');
+                    menuButton.querySelector('svg').innerHTML = `<path stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M4 6h16M4 12h16M4 18h16" />`;
+                }
+            });
+        });
+
+        // Toggle FAQ answers
+        document.querySelectorAll('.faq-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                answer.classList.toggle('hidden');
+                icon.classList.toggle('transform');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+
+        // Add modal functionality
+        function showPurchaseModal(plan) {
+            document.getElementById('selectedPlan').textContent = plan;
+            document.getElementById('purchaseModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePurchaseModal() {
+            document.getElementById('purchaseModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('purchaseModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePurchaseModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePurchaseModal();
+            }
+        });
+
+        // Add video play functionality
+        document.querySelector('.play-button').addEventListener('click', function() {
+            const video = document.querySelector('video');
+            video.play();
+            this.style.display = 'none';
+        });
+
+        // Show play button when video is paused
+        document.querySelector('video').addEventListener('pause', function() {
+            document.querySelector('.play-button').style.display = 'flex';
+        });
+
+        // Hide play button when video is playing
+        document.querySelector('video').addEventListener('play', function() {
+            document.querySelector('.play-button').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
